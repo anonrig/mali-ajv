@@ -12,14 +12,15 @@ npm i --save mali-ajv
 
 ```javascript
 import Mali from 'mali'
-import { addSchemas } from './grpc.validator.js'
+import { addSchemas } from 'mali-ajv'
 import * as accounts from './endpoints/accounts.schema.js'
 import * as memberships from './endpoints/memberships.schema.js'
 
 const app = new Mali()
+app.use(addSchemas(app, { accounts, memberships }))
 app.addService(file, 'Memberships', {})
 app.addService(file, 'Accounts', {})
-app.use(addSchemas(app, { accounts, memberships }))
+app.use('Accounts', { findOne: (ctx) => (ctx.res = 'hello world' ) })
 ```
 
 ## Usage
