@@ -1,0 +1,85 @@
+{
+  "name": "mali-ajv",
+  "version": "0.1.0",
+  "description": "Input validation for Mali.js gRPC microservices",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "c8 ava",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.js\" --fix",
+    "lint:fix": "eslint \"{src,apps,libs,test}/**/*.js\" --fix"
+  },
+  "keywords": [
+    "ajv",
+    "grpc",
+    "mali"
+  ],
+  "author": {
+    "name": "Yagiz Nizipli",
+    "email": "yagiz@nizipli.com"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/anonrig/mali-ajv",
+  "bugs": {
+    "url": "https://github.com/anonrig/mali-ajv/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anonrig/mali-ajv.git"
+  },
+  "dependencies": {
+    "@socketkit/ajv-uuid": "^1.0.1",
+    "ava": "^3.15.0"
+  },
+  "devDependencies": {
+    "@grpc/grpc-js": "*",
+    "@grpc/proto-loader": "^0.6.4",
+    "ajv": "*",
+    "c8": "^7.7.3",
+    "eslint": "^7.31.0",
+    "mali": "^0.44.3"
+  },
+  "peerDependencies": {
+    "@grpc/grpc-js": "^1.3.6",
+    "ajv": "^8.6.2"
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:prettier/recommended",
+      "plugin:import/errors",
+      "plugin:import/warnings",
+      "plugin:security/recommended"
+    ],
+    "plugins": [
+      "prettier",
+      "import",
+      "security"
+    ],
+    "parserOptions": {
+      "sourceType": "module",
+      "ecmaFeatures": {
+        "modules": true
+      },
+      "ecmaVersion": 2020
+    },
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "rules": {
+      "import/extensions": [
+        "error",
+        "always",
+        {
+          "ignorePackages": true
+        }
+      ]
+    }
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "semi": false,
+    "tabWidth": 2
+  }
+}

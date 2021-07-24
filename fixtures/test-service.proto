@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+service Accounts {
+  rpc findOne(AccountFindOne) returns (Account) {}
+  rpc findAll(Empty) returns (AccountsResponse) {}
+}
+
+service Organizations {
+  rpc findOne(OrganizationFindOne) returns (Organization) {}
+}
+
+message Empty {}
+
+message AccountFindOne {
+  string account_id = 1;
+}
+
+message OrganizationFindOne {
+  string organization_id = 1;
+}
+
+message Account {
+  string account_id = 1;
+  string name = 2;
+}
+
+message Organization {
+  string organization_id = 1;
+  string name = 2;
+}
+
+message AccountsResponse {
+  repeated Account rows = 1;
+}
