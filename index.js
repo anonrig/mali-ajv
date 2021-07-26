@@ -9,34 +9,43 @@ export default ajv
 /**
  * @function addSchemas
  * @description Adds JSON schemas to Mali instance
- * @param {import('mali').Mali} mali Mali Instance
+ * @param {import('mali')} app Mali Instance
  * @param {object} schemas Schema function declerations
  * @returns {Function} callback function
  */
 export function addSchemas(app, schemas = {}) {
-  app.context.schemas = new Map(Object.entries(schemas))
+  const compiled = new Map()
 
-  return async function (context, next) {
-    const { req } = context.request
-    const name = context.service.toLowerCase()
-    const service_schemas = app.context.schemas.get(name)
+  for (const [service_name, functions] of Object.entries(schemas)) {
+    if (!compiled.has(service_name)) {
+      compiled.set(service_name, new Map())
+    }
 
-    // Schema does not include the given service decleration
-    if (!service_schemas) {
+    for (const [function_name, function_self] of Object.entries(functions)) {
+      compiled.get(service_name).set(function_name, ajv.compile(function_self))
+    }
+  }
+
+  return function (context, next) {
+    const service_name = context.service.toLowerCase()
+    const function_name = context.name
+
+    const service = compiled.get(service_name)
+
+    // Service does not exist
+    if (!service) {
       return next()
     }
 
-    const schema = service_schemas[context.name]
+    const schema = service.get(function_name)
 
     // Service schema does not include the given function
     if (!schema) {
       return next()
     }
 
-    const isValid = await ajv.validate(schema, req)
-
-    if (!isValid) {
-      const error = new Error(ajv.errorsText(ajv.errors))
+    if (!schema(context.request.req)) {
+      const error = new Error(ajv.errorsText(schema.errors))
       error.code = grpc.status.FAILED_PRECONDITION
       throw error
     }
