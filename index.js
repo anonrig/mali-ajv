@@ -1,9 +1,9 @@
 import grpc from '@grpc/grpc-js'
 import Ajv from 'ajv'
-import uuid from '@socketkit/ajv-uuid'
+import uuidPlugin from '@socketkit/ajv-uuid'
 
 const ajv = new Ajv({ removeAdditional: true })
-uuid(ajv)
+uuidPlugin(ajv)
 export default ajv
 
 /**

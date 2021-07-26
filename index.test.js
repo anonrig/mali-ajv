@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-object-injection */
+
 import { randomUUID } from 'crypto'
 import path from 'path'
 import test from 'ava'
@@ -42,8 +44,14 @@ const getClients = (port) => {
   )
 
   return {
-    accounts: new Accounts(`0.0.0.0:${port}`, grpc.credentials.createInsecure()),
-    organizations: new Organizations(`0.0.0.0:${port}`, grpc.credentials.createInsecure()),
+    accounts: new Accounts(
+      `0.0.0.0:${port}`,
+      grpc.credentials.createInsecure(),
+    ),
+    organizations: new Organizations(
+      `0.0.0.0:${port}`,
+      grpc.credentials.createInsecure(),
+    ),
   }
 }
 
@@ -112,7 +120,9 @@ test('should not throw error on missing schema', async (t) => {
 
   const clients = getClients(port)
   const organizations = promisifyAll(clients.organizations)
-  const response = await organizations.findOne({ organization_id: randomUUID() })
+  const response = await organizations.findOne({
+    organization_id: randomUUID(),
+  })
   t.truthy(response)
 })
 
@@ -129,11 +139,13 @@ test('should not throw error on missing function in a schema', async (t) => {
       },
       findAll: (ctx) => {
         ctx.res = { rows: [] }
-      }
-    }
-  })
-  app.use('Organizations', 'findOne', (ctx) => {
-    ctx.res = { organization_id: randomUUID(), name: 'hello' }
+      },
+    },
+    Organizations: {
+      findOne: (ctx) => {
+        ctx.res = { organization_id: randomUUID(), name: 'hello' }
+      },
+    },
   })
   await app.start(`0.0.0.0:${port}`)
   t.teardown(() => app.close())
