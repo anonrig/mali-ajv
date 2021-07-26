@@ -9,7 +9,6 @@ import loader from '@grpc/proto-loader'
 import { promisify } from 'util'
 
 import * as account_schemas from './fixtures/accounts.schema.js'
-import * as organization_schemas from './fixtures/organizations.schema.js'
 
 import { addSchemas } from './index.js'
 
@@ -55,17 +54,58 @@ const getClients = (port) => {
   }
 }
 
+test('should change error code', async (t) => {
+  const port = getRandomPort()
+  const app = new Mali()
+  app.addService(file, 'Accounts', options)
+  app.addService(file, 'Organizations', options)
+  app.use(
+    addSchemas(
+      app,
+      { accounts: account_schemas },
+      { errorCode: grpc.status.UNAVAILABLE },
+    ),
+  )
+  app.use({
+    Accounts: {
+      findOne: (ctx) =>
+        (ctx.res = { account_id: randomUUID(), name: 'hello ' }),
+    },
+    Organizations: {
+      findOne: (ctx) =>
+        (ctx.res = { organization_id: randomUUID(), name: 'hello ' }),
+    },
+  })
+  await app.start(`0.0.0.0:${port}`)
+  t.teardown(() => app.close())
+
+  const clients = getClients(port)
+  const accounts = promisifyAll(clients.accounts)
+  try {
+    await accounts.findOne({ account_id: 'hello' })
+    throw new Error(`Invalid`)
+  } catch (error) {
+    t.not(error.message, 'Invalid')
+    t.is(error.code, grpc.status.UNAVAILABLE)
+    t.is(error.details, `data/account_id must match format "uuid"`)
+  }
+})
+
 test('should throw error on invalid request', async (t) => {
   const port = getRandomPort()
   const app = new Mali()
   app.addService(file, 'Accounts', options)
   app.addService(file, 'Organizations', options)
   app.use(addSchemas(app, { accounts: account_schemas }))
-  app.use('Accounts', 'findOne', (ctx) => {
-    ctx.res = { account_id: randomUUID(), name: 'hello' }
-  })
-  app.use('Organizations', 'findOne', (ctx) => {
-    ctx.res = { organization_id: randomUUID(), name: 'hello' }
+  app.use({
+    Accounts: {
+      findOne: (ctx) =>
+        (ctx.res = { account_id: randomUUID(), name: 'hello ' }),
+    },
+    Organizations: {
+      findOne: (ctx) =>
+        (ctx.res = { organization_id: randomUUID(), name: 'hello ' }),
+    },
   })
   await app.start(`0.0.0.0:${port}`)
   t.teardown(() => app.close())
@@ -88,11 +128,15 @@ test('should not throw error on valid data', async (t) => {
   app.addService(file, 'Accounts', options)
   app.addService(file, 'Organizations', options)
   app.use(addSchemas(app, { accounts: account_schemas }))
-  app.use('Accounts', 'findOne', (ctx) => {
-    ctx.res = { account_id: randomUUID(), name: 'hello' }
-  })
-  app.use('Organizations', 'findOne', (ctx) => {
-    ctx.res = { organization_id: randomUUID(), name: 'hello' }
+  app.use({
+    Accounts: {
+      findOne: (ctx) =>
+        (ctx.res = { account_id: randomUUID(), name: 'hello ' }),
+    },
+    Organizations: {
+      findOne: (ctx) =>
+        (ctx.res = { organization_id: randomUUID(), name: 'hello ' }),
+    },
   })
   await app.start(`0.0.0.0:${port}`)
   t.teardown(() => app.close())
@@ -109,11 +153,15 @@ test('should not throw error on missing schema', async (t) => {
   app.addService(file, 'Accounts', options)
   app.addService(file, 'Organizations', options)
   app.use(addSchemas(app, { accounts: account_schemas }))
-  app.use('Accounts', 'findOne', (ctx) => {
-    ctx.res = { account_id: randomUUID(), name: 'hello' }
-  })
-  app.use('Organizations', 'findOne', (ctx) => {
-    ctx.res = { organization_id: randomUUID(), name: 'hello' }
+  app.use({
+    Accounts: {
+      findOne: (ctx) =>
+        (ctx.res = { account_id: randomUUID(), name: 'hello ' }),
+    },
+    Organizations: {
+      findOne: (ctx) =>
+        (ctx.res = { organization_id: randomUUID(), name: 'hello ' }),
+    },
   })
   await app.start(`0.0.0.0:${port}`)
   t.teardown(() => app.close())

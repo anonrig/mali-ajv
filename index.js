@@ -11,9 +11,15 @@ export default ajv
  * @description Adds JSON schemas to Mali instance
  * @param {import('mali')} app Mali Instance
  * @param {object} schemas Schema function declerations
+ * @param {object} options Ajv Mali Options
+ * @param {import('@grpc/grpc-js/build/src/constants').Status} options.errorCode gRPC error code
  * @returns {Function} callback function
  */
-export function addSchemas(app, schemas = {}) {
+export function addSchemas(
+  app,
+  schemas = {},
+  options = { errorCode: grpc.status.FAILED_PRECONDITION },
+) {
   const compiled = new Map()
 
   for (const [service_name, functions] of Object.entries(schemas)) {
@@ -46,7 +52,8 @@ export function addSchemas(app, schemas = {}) {
 
     if (!schema(context.request.req)) {
       const error = new Error(ajv.errorsText(schema.errors))
-      error.code = grpc.status.FAILED_PRECONDITION
+      // @ts-ignore
+      error.code = options.errorCode
       throw error
     }
 
