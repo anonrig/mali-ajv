@@ -18,7 +18,7 @@ export default ajv
 export function addSchemas(
   app,
   schemas = {},
-  options = { errorCode: grpc.status.FAILED_PRECONDITION },
+  options = { errorCode: grpc.status.FAILED_PRECONDITION, ajv: null },
 ) {
   const compiled = new Map()
 
@@ -28,7 +28,7 @@ export function addSchemas(
     }
 
     for (const [function_name, function_self] of Object.entries(functions)) {
-      compiled.get(service_name).set(function_name, ajv.compile(function_self))
+      compiled.get(service_name).set(function_name, (options.ajv ?? ajv).compile(function_self))
     }
   }
 
@@ -51,7 +51,7 @@ export function addSchemas(
     }
 
     if (!schema(context.request.req)) {
-      const error = new Error(ajv.errorsText(schema.errors))
+      const error = new Error((options.ajv ?? ajv).errorsText(schema.errors))
       // @ts-ignore
       error.code = options.errorCode
       throw error
