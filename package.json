@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@socketkit/ajv-uuid": "^1.0.1",
-    "ava": "^3.15.0"
+    "ava": "^5.2.0"
   },
   "devDependencies": {
     "@grpc/grpc-js": "*",
